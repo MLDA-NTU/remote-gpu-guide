@@ -1,2 +1,257 @@
-# remote-gpu-guide
+# Remote GPU Guide
+
 Guide on how to use MLDA GPU servers for Machine Learning
+
+## Connect to the GPU server
+
+### NTU VPN
+
+You can only connect to the GPU server if you are connected to NTU network. If you are using Hall internet or home internet, set up NTU VPN to connect to NTU network.
+
+Install and setup NTU VPN: https://ntuvpn.ntu.edu.sg/
+
+### SSH
+
+**OpenSSH** You will use SSH (Secure Shell Protocol) to connect to the GPU server. For MacOS, Linux and Windows (build 1809 or later), OpenSSH is built-in.
+
+Open your Terminal (MacOS and Linux) or Command Prompt (Windows) and use the command: `ssh <username>@<domain.name>`
+
+```bash
+ssh acct2009_demo@dl2080-09.dynip.ntu.edu.sg
+```
+
+For first-time ssh, type "yes" when you are asked to accept the SSH key fingerprint. Type in your password and press Enter to finish connecting to the server. Now you should see info about the GPU server and your username in the terminal.
+
+The username, domain name, and password should be provided to you when you sign up for a GPU account.
+
+**(Optional) Using SSH key** Using an SSH key is more secure than using a password. You also don’t need to type in a password when you use an SSH key.
+
+ssh-keygen-id
+
+ssh-copy
+
+**PuTTy** For earlier versions of Windows, please use PuTTy. Download PuTTY here: https://www.chiark.greenend.org.uk/~sgtatham/putty/
+
+## Basic navigation
+
+Command | Description
+--------|------------
+`cd` | Change directory (folder)
+`mkdir` | Make directory (folder)
+`pwd` | Print working (current) directory
+`mv` | Move (files or folders). Can use this command to rename also
+`rm` | Remove
+`cp` | Copy
+
+Linux Command Cheat Sheet: 
+
+## Python for Data Science and Machine Learning
+
+The recommended way to install and use Python is using Anaconda. You don’t need admin rights to install and use Python with Anaconda. We will use Miniconda and install packages as we need.
+
+Installation guide: Installing on Linux — conda documentation
+
+Note:
+- Make sure to initialize conda (conda init) when it is prompted. This will add “conda” to path so that you can use conda the next time you log in to your account
+- Exit and log in to your account again. You should now see “(base)” in front your username in the terminal
+
+### Set up Python environment
+
+It is recommended to create a separate virtual environment for each project. (What is a virtual environment?)
+
+To create a new environment (change “3.8” if you need a different Python version)
+
+```bash
+conda create -n <name of your environment> python=3.8
+```
+
+To activate the environment
+
+```bash
+conda activate <name of your environment>
+```
+
+Note: Name of the active environment should be reflected before your username in the terminal
+
+To install packages / libraries to your environment
+
+```bash
+conda install <package name>
+pip install <package name>
+```
+
+Note:
+
+- You can use either “conda” or “pip” to install packages. Generally “conda” resolves dependency issues better. However there are many packages only available on “pip”
+- For libraries that depend on GPU (using CUDA), you must install it with “conda”. This is because “conda” will install the correct CUDA/cuDNN version for your libraries. See how to install TensorFlow and PyTorch below.
+
+To list installed packages
+
+```bash
+conda list
+pip freeze
+```
+
+To deactivate the environment (when you finish working on a project)
+
+```bash
+conda deactivate
+```
+
+To see what environments are available
+
+```bash
+conda env list
+```
+
+### Install Deep Learning libraries
+
+#### TensorFlow
+
+Install TensorFlow with conda (DO NOT follow the official installation instruction)
+
+```bash
+conda install tensorflow-gpu
+```
+
+Verify TensorFlow is working and is using GPU. Run this in Python
+
+```python
+import tensorflow as tf
+print(tf.config.list_physical_devices('GPU'))
+```
+
+#### PyTorch
+
+Install PyTorch with conda (you can follow the official instruction here)
+
+```bash
+conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch -c nvidia
+```
+
+Verify PyTorch is working and is using GPU. Run this in Python
+
+```python
+import torch
+print(torch.cuda.is_available())
+```
+
+## Code editors
+
+### Jupyter Notebook / Jupyter Lab
+
+Jupyter Notebook / Jupyter Lab is a popular web interface to quickly build Data science projects. It is a Python package so you can also install it with `conda` or `pip`
+
+Install Jupyter Notebook / Lab: 
+
+To run Jupyter Notebook / Lab on the GPU server, type this in the terminal
+
+```bash
+jupyter notebook
+```
+
+Now the Jupyter Notebook is running on your GPU server. However, you need port forwarding to access the Jupyter Notebook from your personal computer. You can use ssh to do this by adding the `-NfL` flags
+
+```bash
+ssh -NfL localhost:<remote port>:localhost:<local port> <username>@xxx.dynip.ntu.edu.sg
+```
+
+E.g. Jupyter Notebook uses port `8888` by default. If someone else is using that port, you will need to forward the port that is used by your Jupyter Notebook.
+
+```bash
+ssh -NfL localhost:8888:localhost:8888 acct0000@0000.dynip.ntu.edu.sg
+```
+
+Now you can access Jupyter Notebook on your local machine at `localhost:8888`
+
+### VS Code
+
+### PyCharm
+
+## Others
+
+### Common tasks with GPU
+
+Check GPU usage
+
+```bash
+nvidia-smi
+```
+
+Choose a GPU for training
+
+```bash
+export CUDA_VISIBLE_DEVICES=1
+```
+
+```bash
+CUDA_VISIBLE_DEVICES=1 python train.py
+```
+
+```python
+import os
+os.environ[“CUDA_VISIBLE_DEVICES”] = “1”
+```
+
+Run detached session for long training schedule
+
+```bash
+screen -S <session name> python train.py
+```
+
+Ctrl + A and Ctrl + D: exit session (it’s still running)
+
+screen -r
+
+Kill a process
+
+```bash
+ps -aux | grep “command you used e.g. python train.py”
+kill 1234
+```
+
+### File transfer
+
+Use scp to copy files between the GPU server and your personal computer.
+
+```bash
+scp <username>@<domain.name>:/remote/path local/path
+scp local/path <username>@<domain.name>:/remote/path
+```
+
+Alternatively, you can also use a GUI app, such as FileZilla
+
+Note: transfer speed will be slow when you are connected via NTU VPN.
+
+Use GitHub to backup and store your code. It is also a good practice to use git for version control in case you need to revert your code to an earlier version.
+
+Basic commands Some commands to help you get started
+
+```bash
+git clone
+git pull
+git add .
+git commit -m
+git push
+```
+
+Note: before making a git commit, you have to set your git name and email.
+
+```bash
+git config user.name=”Andrew Ng”
+git config user.email=”andrew@gmail.com”
+```
+
+Download files from the web with wget
+
+```bash
+wget <download link>
+```
+
+Download files from Google Drive. For small files, you can still download them with wget. However, there are usually problems with downloading large files from Google Drive. In this case, you should use `gdown`, a Python package
+
+```bash
+pip install gdown
+```
+
+Gdown guide: https://github.com/wkentaro/gdown
