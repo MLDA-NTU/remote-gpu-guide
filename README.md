@@ -169,6 +169,8 @@ Now the Jupyter Notebook is running on your GPU server. However, you need port f
 ssh -NfL localhost:<remote port>:localhost:<local port> <username>@xxx.dynip.ntu.edu.sg
 ```
 
+NOTE: you should run the above command on your **local machine**, not on the remote server
+
 Jupyter Notebook uses port `8888` by default. If someone else is using that port, you will need to forward the port that is used by your Jupyter Notebook.
 
 ```bash
